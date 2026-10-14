@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Pokédex AR</string>
+    <string name="title_activity_main">Pokédex AR</string>
+    <string name="package_name">com.osdam.pokedexar</string>
+    <string name="custom_url_scheme">com.osdam.pokedexar</string>
+</resources>

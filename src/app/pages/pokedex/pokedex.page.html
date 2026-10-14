@@ -1,0 +1,83 @@
+<ion-header class="ion-no-border">
+  <ion-toolbar class="top-toolbar">
+    <div class="title-row">
+      <div class="logo"></div>
+      <div>
+        <h1>Pokédex</h1>
+        <p>{{ total }} Pokémon · en realidad aumentada</p>
+      </div>
+    </div>
+  </ion-toolbar>
+  <ion-toolbar class="top-toolbar">
+    <ion-searchbar
+      class="search"
+      placeholder="Busca por nombre o número"
+      [debounce]="250"
+      (ionInput)="onSearch($event)"
+    ></ion-searchbar>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true" class="dex-content">
+  <div class="type-filter">
+    <button class="chip" [class.active]="selectedType() === null" (click)="selectType(null)">Todos</button>
+    @for (t of types; track t) {
+      <button
+        class="chip"
+        [class.active]="selectedType() === t"
+        [style.--chip-color]="typeColor(t)"
+        (click)="selectType(t)"
+      >
+        <span class="dot"></span>{{ typeLabel(t) }}
+      </button>
+    }
+  </div>
+
+  @if (loading()) {
+    <div class="grid">
+      @for (s of skeletons; track s) {
+        <div class="card skeleton">
+          <ion-skeleton-text [animated]="true" class="sk-title"></ion-skeleton-text>
+          <ion-skeleton-text [animated]="true" class="sk-pill"></ion-skeleton-text>
+          <ion-skeleton-text [animated]="true" class="sk-img"></ion-skeleton-text>
+        </div>
+      }
+    </div>
+  } @else if (error()) {
+    <div class="state">
+      <div class="state-ball"></div>
+      <p>No se pudo conectar con PokeAPI.</p>
+      <ion-button shape="round" color="danger" (click)="load()">
+        <ion-icon slot="start" name="refresh-outline"></ion-icon>
+        Reintentar
+      </ion-button>
+    </div>
+  } @else {
+    @if (filtered().length === 0) {
+      <div class="state">
+        <div class="state-ball"></div>
+        <p>No se encontró ningún Pokémon.</p>
+      </div>
+    }
+    <div class="grid">
+      @for (p of visible(); track p.id) {
+        <a class="card ion-activatable" [routerLink]="['/pokemon', p.id]" [style.--type-color]="typeColor(typesOf(p.id)[0])">
+          <span class="number">{{ formatId(p.id) }}</span>
+          <span class="name">{{ formatName(p.name) }}</span>
+          <div class="pills">
+            @for (t of typesOf(p.id); track t) {
+              <span class="pill" [style.background]="typeColor(t)">{{ typeLabel(t) }}</span>
+            }
+          </div>
+          <div class="watermark"></div>
+          <img [src]="artworkUrl(p.id)" [alt]="p.name" width="92" height="92" loading="lazy" decoding="async" />
+          <ion-icon class="ar-badge" name="cube-outline"></ion-icon>
+          <ion-ripple-effect></ion-ripple-effect>
+        </a>
+      }
+    </div>
+    <ion-infinite-scroll (ionInfinite)="loadMore($event)" [disabled]="!hasMore()">
+      <ion-infinite-scroll-content loadingSpinner="dots"></ion-infinite-scroll-content>
+    </ion-infinite-scroll>
+  }
+</ion-content>

@@ -1,0 +1,100 @@
+<ion-header [translucent]="true">
+  <ion-toolbar [style.--background]="mainColor()" class="detail-toolbar">
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/pokedex" text=""></ion-back-button>
+    </ion-buttons>
+    <ion-title>{{ pokemon()?.displayName ?? 'Cargando…' }}</ion-title>
+    <ion-buttons slot="end">
+      <ion-button [disabled]="id() <= 1" [routerLink]="['/pokemon', id() - 1]" routerDirection="back">
+        <ion-icon slot="icon-only" name="chevron-back"></ion-icon>
+      </ion-button>
+      <ion-button [disabled]="id() >= total" [routerLink]="['/pokemon', id() + 1]" routerDirection="forward">
+        <ion-icon slot="icon-only" name="chevron-forward"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true">
+  @if (pokemon(); as p) {
+    <section class="hero" [style.--type-color]="mainColor()">
+      <span class="hero-number">{{ formatId(p.id) }}</span>
+      <img class="artwork" [src]="p.artwork" [alt]="p.displayName" />
+    </section>
+
+    <section class="info">
+      <h1>{{ p.displayName }}</h1>
+      @if (p.genus) {
+        <p class="genus">{{ p.genus }}</p>
+      }
+      <div class="types">
+        @for (t of p.types; track t) {
+          <span class="type-chip" [style.background]="typeColor(t)">{{ typeLabel(t) }}</span>
+        }
+      </div>
+
+      <ion-button
+        expand="block"
+        shape="round"
+        size="large"
+        class="ar-button"
+        [style.--background]="mainColor()"
+        [routerLink]="['/ar', p.id]"
+      >
+        <ion-icon slot="start" name="cube-outline"></ion-icon>
+        Ver en Realidad Aumentada
+      </ion-button>
+
+      @if (p.description) {
+        <p class="description">{{ p.description }}</p>
+      }
+
+      <div class="measures">
+        <div>
+          <strong>{{ p.heightM }} m</strong>
+          <span>Altura</span>
+        </div>
+        <div>
+          <strong>{{ p.weightKg }} kg</strong>
+          <span>Peso</span>
+        </div>
+        @if (p.cry) {
+          <div>
+            <ion-button fill="clear" size="small" (click)="playCry()">
+              <ion-icon slot="icon-only" name="volume-high-outline"></ion-icon>
+            </ion-button>
+            <span>Grito</span>
+          </div>
+        }
+      </div>
+
+      <h2>Estadísticas base</h2>
+      <div class="stats">
+        @for (s of p.stats; track s.key) {
+          <div class="stat">
+            <span class="stat-label">{{ s.label }}</span>
+            <span class="stat-value">{{ s.value }}</span>
+            <div class="bar">
+              <div class="fill" [style.width.%]="statPercent(s.value)" [style.background]="mainColor()"></div>
+            </div>
+          </div>
+        }
+      </div>
+
+      <h2>Habilidades</h2>
+      <div class="abilities">
+        @for (a of p.abilities; track a) {
+          <span>{{ a }}</span>
+        }
+      </div>
+    </section>
+  } @else if (error()) {
+    <div class="state">
+      <p>No se pudo cargar este Pokémon.</p>
+    </div>
+  } @else {
+    <div class="state">
+      <ion-spinner name="crescent"></ion-spinner>
+    </div>
+  }
+</ion-content>

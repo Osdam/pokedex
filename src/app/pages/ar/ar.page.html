@@ -1,0 +1,81 @@
+<ion-content
+  [fullscreen]="true"
+  [scrollY]="false"
+  class="ar-content"
+  [class.camera-on]="mode() === 'camera'"
+  [class.native-on]="mode() === 'native'"
+>
+  <video #video class="camera-feed" playsinline muted autoplay></video>
+  <div #stage class="stage" [class.viewer-bg]="mode() === 'viewer' || mode() === 'loading' || mode() === 'idle'"></div>
+
+  <!-- Este div es también el "dom-overlay" de la sesión WebXR -->
+  <div #overlay class="overlay">
+    <div class="top-bar">
+      <ion-button class="round-btn" shape="round" color="light" (click)="exit()">
+        <ion-icon slot="icon-only" name="close"></ion-icon>
+      </ion-button>
+      @if (pokemon(); as p) {
+        <div class="pill">{{ formatId(p.id) }} · {{ p.displayName }}</div>
+      }
+    </div>
+
+    @switch (mode()) {
+      @case ('idle') {
+        <div class="start-panel ar-interactive">
+          @if (pokemon(); as p) {
+            <img [src]="p.artwork" [alt]="p.displayName" />
+            <h2>{{ p.displayName }}</h2>
+            <p>
+              Altura real: <strong>{{ p.heightM }} m</strong>.
+              @if (arCoreSupported() || xrSupported()) {
+                Tu móvil soporta ARCore: detectará el suelo y podrás caminar a su alrededor.
+              } @else {
+                Se usará la cámara y el giroscopio del móvil.
+              }
+            </p>
+            <ion-button expand="block" shape="round" color="danger" (click)="startAr()">
+              <ion-icon slot="start" name="camera"></ion-icon>
+              Iniciar Realidad Aumentada
+            </ion-button>
+            <ion-button expand="block" shape="round" fill="outline" color="light" (click)="start('viewer')">
+              <ion-icon slot="start" name="cube-outline"></ion-icon>
+              Ver en 3D (sin cámara)
+            </ion-button>
+          } @else {
+            <ion-spinner name="crescent" color="light"></ion-spinner>
+          }
+        </div>
+      }
+      @case ('loading') {
+        <div class="center"><ion-spinner name="crescent" color="light"></ion-spinner></div>
+      }
+      @default {
+        @if (status()) {
+          <div class="hint">{{ status() }}</div>
+        }
+        <div class="controls ar-interactive">
+          <ion-button class="round-btn" shape="round" color="light" (click)="scale(1 / 1.25)">
+            <ion-icon slot="icon-only" name="remove"></ion-icon>
+          </ion-button>
+          <ion-button class="size-btn" shape="round" color="light" (click)="realSize()">
+            <ion-icon slot="start" name="resize-outline"></ion-icon>
+            {{ height().toFixed(2) }} m
+          </ion-button>
+          <ion-button class="round-btn" shape="round" color="light" (click)="scale(1.25)">
+            <ion-icon slot="icon-only" name="add"></ion-icon>
+          </ion-button>
+          @if (mode() === 'camera') {
+            <ion-button class="round-btn" shape="round" color="light" (click)="recenter()">
+              <ion-icon slot="icon-only" name="locate-outline"></ion-icon>
+            </ion-button>
+          }
+          @if (pokemon()?.cry) {
+            <ion-button class="round-btn" shape="round" color="danger" (click)="playCry()">
+              <ion-icon slot="icon-only" name="volume-high-outline"></ion-icon>
+            </ion-button>
+          }
+        </div>
+      }
+    }
+  </div>
+</ion-content>
